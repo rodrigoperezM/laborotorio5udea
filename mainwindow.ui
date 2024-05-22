@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
+    <width>950</width>
     <height>498</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>600</width>
+      <width>691</width>
       <height>481</height>
      </rect>
     </property>
@@ -29,12 +29,12 @@
      <rect>
       <x>750</x>
       <y>30</y>
-      <width>71</width>
+      <width>81</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>piedra</string>
+     <string> piedra</string>
     </property>
     <property name="iconSize">
      <size>
@@ -53,7 +53,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>papel</string>
+     <string> papel</string>
     </property>
     <property name="iconSize">
      <size>
@@ -111,7 +111,7 @@
     <property name="geometry">
      <rect>
       <x>750</x>
-      <y>320</y>
+      <y>330</y>
       <width>64</width>
       <height>23</height>
      </rect>
@@ -136,7 +136,7 @@
     <property name="geometry">
      <rect>
       <x>750</x>
-      <y>360</y>
+      <y>390</y>
       <width>64</width>
       <height>23</height>
      </rect>
@@ -172,13 +172,39 @@
      </rect>
     </property>
    </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>370</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Puntaje Jugador</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>310</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tiempo</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
+     <width>950</width>
      <height>21</height>
     </rect>
    </property>

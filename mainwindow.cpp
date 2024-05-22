@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , scene(new QGraphicsScene(this))
     , timer(new QTimer(this))
+    , autoCreateTimer(new QTimer(this)) // Inicializar autoCreateTimer
     , tiempoRestante(300) // Tiempo inicial en segundos (5 minutos)
     , puntaje(0) // Inicializar puntaje en 0
     , puntajeTijeras(0) // Inicializar puntaje tijeras en 0
@@ -25,8 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->ingresarJugador, &QPushButton::clicked, this, &MainWindow::ingresarJugador);
     connect(ui->inicio, &QPushButton::clicked, this, &MainWindow::iniciarJuego);
     connect(timer, &QTimer::timeout, this, &MainWindow::actualizarTiempo);
-    connect(timer, &QTimer::timeout, this, &MainWindow::crearObjetosAutomaticamente);
-
+    connect(autoCreateTimer, &QTimer::timeout, this, &MainWindow::crearObjetosAutomaticamente);
 
     // Inicializar las secciones de puntajes
     ui->puntajeTijeras->display(puntajeTijeras);
@@ -39,28 +39,6 @@ MainWindow::~MainWindow()
     delete ui;
     delete scene;
     delete timer;
-}
-
-void MainWindow::keyPressEvent(QKeyEvent *event) {
-    switch (event->key()) {
-        case Qt::Key_W: // Mover hacia arriba
-            moverJugador(0, -10);
-            break;
-        case Qt::Key_S: // Mover hacia abajo
-            moverJugador(0, 10);
-            break;
-        case Qt::Key_A: // Mover hacia la izquierda
-            moverJugador(-10, 0);
-            break;
-        case Qt::Key_D: // Mover hacia la derecha
-            moverJugador(10, 0);
-            break;
-        case Qt::Key_Space: // Tecla de ataque
-            atacarObjeto();
-            break;
-        default:
-            QMainWindow::keyPressEvent(event);
-    }
 }
 
 void MainWindow::agregarPiedra() {
@@ -136,29 +114,68 @@ void MainWindow::agregarMira() {
     scene->addItem(mira);
 }
 
+void MainWindow::moverJugador(int dx, int dy) {
+    if (mira) {
+        mira->moveBy(dx, dy);
+    }
+}
+
+// Mover la mira
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    switch (event->key()) {
+        case Qt::Key_W: // Mover hacia arriba
+            moverJugador(0, -10);
+            break;
+        case Qt::Key_S: // Mover hacia abajo
+            moverJugador(0, 10);
+            break;
+        case Qt::Key_A: // Mover hacia la izquierda
+            moverJugador(-10, 0);
+            break;
+        case Qt::Key_D: // Mover hacia la derecha
+            moverJugador(10, 0);
+            break;
+        case Qt::Key_Space: // Tecla de ataque
+            atacarObjeto();
+            break;
+        default:
+            QMainWindow::keyPressEvent(event);
+    }
+}
+
+void MainWindow::iniciarJuego() {
+
+    tiempoRestante = 300; // Tiempo inicial en segundos
+    actualizarTiempo(); // Lógica para iniciar el juego
+    timer->start(1000); // Iniciar el temporizador con un intervalo de 1 segundo
+    // Llamar a la función para crear objetos automáticamente
+        crearObjetosAutomaticamente();
+
+        // Iniciar autoCreateTimer para crear objetos automáticamente cada 10 segundos
+        autoCreateTimer->start(1000);
+
+
+}
 
 void MainWindow::ingresarJugador() {
     agregarMira();
     tiempoRestante = 300; // 5 minutos en segundos
-    ui->tiempoLabel->display(tiempoRestante); // Mostrar el tiempo restante
+    //ui->tiempoLabel->display(tiempoRestante); // Mostrar el tiempo restante
     timer->start(1000); // Iniciar el temporizador con intervalo de 1 segundo
-    // Llamar a la función para crear objetos automáticamente cada 10 segundos
-       QTimer::singleShot(10000, this, &MainWindow::crearObjetosAutomaticamente);
 
-    //desabilitar botones
+    autoCreateTimer->start(10000); // Iniciar el temporizador para crear objetos automáticamente cada 10 segundos
+
+    // Llamar a la función para crear objetos automáticamente cada 10 segundos
+    QTimer *crearObjetosTimer = new QTimer(this);
+    connect(crearObjetosTimer, &QTimer::timeout, this, &MainWindow::crearObjetosAutomaticamente);
+    crearObjetosTimer->start(10000); // Intervalo de 10 segundos
+
+    // Deshabilitar botones
     ui->piedra->setDisabled(true);
     ui->papel->setDisabled(true);
     ui->tijera->setDisabled(true);
     ui->ingresarJugador->setDisabled(true);
-    //ui->inicio->setDisabled(true);
-
-}
-
-void MainWindow::iniciarJuego() {
-    //deshabilitarBotones();
-    tiempoRestante = 300; // Tiempo inicial en segundos
-    actualizarTiempo(); // Lógica para iniciar el juego
-    timer->start(1000); // Iniciar el temporizador con un intervalo de 10 segundos (10000 milisegundos)
+    ui->inicio->setDisabled(true);
 }
 
 void MainWindow::actualizarTiempo() {
@@ -168,9 +185,9 @@ void MainWindow::actualizarTiempo() {
     if (tiempoRestante <= 0) {
         timer->stop();
         QMessageBox::information(this, "Fin de juego", "Se acabó el tiempo. ¡Juego terminado!");
+    autoCreateTimer->stop(); // Detener autoCreateTimer cuando se acabe el tiempo
     }
 }
-
 
 void MainWindow::atacarObjeto() {
     if (mira) {
@@ -198,7 +215,6 @@ void MainWindow::atacarObjeto() {
     }
 }
 
-
 void MainWindow::actualizarPuntaje(int cambio, const QString &tipo) {
     puntaje += cambio;
     ui->puntajeLabel->display(puntaje);
@@ -212,12 +228,6 @@ void MainWindow::actualizarPuntaje(int cambio, const QString &tipo) {
     } else if (tipo == "papel") {
         puntajePapel += cambio;
         ui->puntajePapel->display(puntajePapel);
-    }
-}
-
-void MainWindow::moverJugador(int dx, int dy) {
-    if (mira) {
-        mira->moveBy(dx, dy);
     }
 }
 
