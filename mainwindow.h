@@ -5,9 +5,8 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
-#include <QTimer>
 #include <QKeyEvent>
-#include <QRandomGenerator>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,7 +17,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 protected:
@@ -28,23 +27,33 @@ private slots:
     void agregarPiedra();
     void agregarPapel();
     void agregarTijera();
+    void agregarMira();
     void ingresarJugador();
     void iniciarJuego();
     void actualizarTiempo();
-    void crearObjetosAutomaticamente();
-    void moverJugador(int dx, int dy);
     void atacarObjeto();
-    void actualizarPuntaje(int cambio);
-    void deshabilitarBotones();
-    bool verificarColision(QGraphicsPixmapItem *item);
+    void moverJugador(int dx, int dy);
+    void moverTijeras();
+    void moverPiedra();
+    void moverPapel();
+    void actualizarPuntaje(int cambio, const QString &tipo);
+    void crearObjetosAutomaticamente();
+
 
 private:
+    bool verificarColision(QGraphicsPixmapItem *item);
+    //void deshabilitarBotones();
+    QTimer *autoCreateTimer; // Temporizador para crear objetos automáticamente
+
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
     QTimer *timer;
     int tiempoRestante;
     int puntaje;
-    QGraphicsPixmapItem *mira; // Agregar la mira como miembro de la clase
+    int puntajeTijeras;
+    int puntajePiedra;
+    int puntajePapel;
+    QGraphicsPixmapItem *mira;
 };
 
 #endif // MAINWINDOW_H
