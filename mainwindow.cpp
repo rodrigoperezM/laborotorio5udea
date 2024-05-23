@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     , puntajeTijeras(0) // Inicializar puntaje tijeras en 0
     , puntajePiedra(0) // Inicializar puntaje piedra en 0
     , puntajePapel(0) // Inicializar puntaje papel en 0
+    , puntajeLabel(0)
     , mira(nullptr) // Inicializar la mira como nullptr
 
 {
@@ -207,8 +208,25 @@ void MainWindow::actualizarTiempo() {
 
     if (tiempoRestante <= 0) {
         timer->stop();
-        QMessageBox::information(this, "Fin de juego", "Se acabó el tiempo. ¡Juego terminado!");
-    autoCreateTimer->stop(); // Detener autoCreateTimer cuando se acabe el tiempo
+        autoCreateTimer->stop(); // Detener autoCreateTimer cuando se acabe el tiempo
+
+        // Determinar el ganador basado en el puntaje
+        QString ganador;
+        int puntajeMaximo = qMax(puntajeTijeras, qMax(puntajePiedra, puntajePapel));
+        if (puntajeMaximo == puntajeTijeras) {
+            ganador = "Tijeras";
+        } else if (puntajeMaximo == puntajePiedra) {
+            ganador = "Piedras";
+        } else if (puntajeMaximo == puntajePapel) {
+            ganador = "Papeles";
+        }
+
+        // Verificar si el jugador tiene el puntaje máximo
+               if (puntajeMaximo == puntajeLabel) {
+                   ganador = "el jugador";
+               }
+        QMessageBox::information(this, "Fin de juego", "Se acabó el tiempo. ¡Juego terminado!\n"
+                                 "El ganador es: " + ganador);
     }
 }
 
@@ -236,8 +254,6 @@ void MainWindow::atacarObjeto() {
 
                     }
                 }
-                //puntaje += puntos;
-                //ui->puntajeLabel->display(puntaje);
 
                 delete item;
                 break;

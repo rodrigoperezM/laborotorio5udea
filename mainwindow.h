@@ -108,6 +108,7 @@ private:
     int puntajeTijeras;
     int puntajePiedra;
     int puntajePapel;
+    int puntajeLabel;
     QGraphicsPixmapItem *mira;
     QMap<QGraphicsPixmapItem*, QPointF> direcciones; // Agregar aquí
 
