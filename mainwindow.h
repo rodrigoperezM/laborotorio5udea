@@ -1,4 +1,4 @@
-
+/*
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -56,5 +56,65 @@ private:
     QGraphicsPixmapItem *mira;
 };
 
-#endif // MAINWINDOW_H
+#endif // MAINWINDOW_H*/
 
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
+#include <QKeyEvent>
+#include <QTimer>
+#include <QMap>
+#include <QPointF>
+
+namespace Ui {
+class MainWindow;
+}
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private slots:
+    void agregarPiedra();
+    void agregarPapel();
+    void agregarTijera();
+    void agregarMira();
+    void moverJugador(int dx, int dy);
+    void iniciarJuego();
+    void ingresarJugador();
+    void actualizarTiempo();
+    void atacarObjeto();
+    void actualizarPuntaje(int cambio, const QString &tipo);
+    bool verificarColision(QGraphicsPixmapItem *item);
+    void moverTijeras();
+    void moverPiedra();
+    void moverPapel();
+    void crearObjetosAutomaticamente();
+
+private:
+    Ui::MainWindow *ui;
+    QGraphicsScene *scene;
+    QTimer *timer;
+    QTimer *autoCreateTimer;
+    int tiempoRestante;
+    int puntaje;
+    int puntajeTijeras;
+    int puntajePiedra;
+    int puntajePapel;
+    QGraphicsPixmapItem *mira;
+    QMap<QGraphicsPixmapItem*, QPointF> direcciones; // Agregar aquí
+
+
+    int contarObjetos(const QString &tipo); // Agregar aquí
+
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+};
+#endif // MAINWINDOW_H
