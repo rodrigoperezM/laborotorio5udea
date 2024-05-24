@@ -3,6 +3,7 @@
 #include "ui_mainwindow.h"
 #include <QRandomGenerator>
 #include <QMessageBox>
+#include <QMediaPlayer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,8 +20,12 @@ MainWindow::MainWindow(QWidget *parent)
     , mira(nullptr) // Inicializar la mira como nullptr
 
 {
+
+    // En el constructor de tu clase MainWindow, inicializa el objeto QMediaPlayer
+
     ui->setupUi(this);
     ui->graphicsView->setScene(scene);
+    player = new QMediaPlayer(this);
 
     connect(ui->piedra, &QPushButton::clicked, this, &MainWindow::agregarPiedra);
     connect(ui->papel, &QPushButton::clicked, this, &MainWindow::agregarPapel);
@@ -34,13 +39,25 @@ MainWindow::MainWindow(QWidget *parent)
     ui->puntajeTijeras->display(puntajeTijeras);
     ui->puntajePiedra->display(puntajePiedra);
     ui->puntajePapel->display(puntajePapel);
+
+    // Mostrar mensaje con instrucciones
+        QMessageBox::information(this, "Bienvenido al juego PIEDRA, PAPEL O TIJERA",
+            "Instrucciones del Juego\n",
+            "1-Usa W, A, S, D para mover la mira.\n"
+            "2-Presiona Espacio para atacar objetos.\n"
+            "3-El objetivo es destruir tantos objetos como puedas.\n"
+            "4-Puedes agregar piedras, papeles o tijeras usando los botones correspondientes.\n"
+            "5-El juego termina cuando se acaba el tiempo.\n"
+            "¡Disfruta del juego y diviertete!");
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-    delete scene;
     delete timer;
+    delete scene;
+    delete ui;
+
+
 }
 
 int MainWindow::contarObjetos(const QString &tipo) {
@@ -77,7 +94,7 @@ void MainWindow::agregarPiedra() {
             connect(timerPiedra, &QTimer::timeout, this, &MainWindow::moverPiedra);
             timerPiedra->start(80);
         } else {
-            delete piedraItem;
+            //delete piedraItem;
         }
     }
 }
@@ -99,7 +116,7 @@ void MainWindow::agregarPapel() {
             connect(timerPapel, &QTimer::timeout, this, &MainWindow::moverPapel);
             timerPapel->start(80);
         } else {
-            delete papelItem;
+            //delete papelItem;
         }
     }
 }
@@ -121,7 +138,7 @@ void MainWindow::agregarTijera() {
             connect(timerTijera, &QTimer::timeout, this, &MainWindow::moverTijeras);
             timerTijera->start(80);
         } else {
-            delete tijeraItem;
+            //delete tijeraItem;
         }
     }
 }
@@ -255,8 +272,12 @@ void MainWindow::atacarObjeto() {
                     }
                 }
 
-                delete item;
-                break;
+                player->setMedia(QUrl("qrc:/sonido.mp3"));
+                   player->play();
+
+
+                //delete item;
+                return;
             }
         }
     }
@@ -305,12 +326,12 @@ void MainWindow::moverTijeras() {
                         // Tijeras destruyen papel
                         scene->removeItem(otroPixmapItem);
                         actualizarPuntaje(1, "tijeras");
-                        delete otroPixmapItem;
+                        //delete otroPixmapItem;
                     } else if (otroPixmap.cacheKey() == QPixmap(":/Objetos/piedra.png").cacheKey()) {
                         // Piedra destruye tijeras
                         scene->removeItem(tijeraItem);
                         actualizarPuntaje(1, "piedra");
-                        delete tijeraItem;
+                        //delete tijeraItem;
                         break;
                     }
                 }
@@ -346,12 +367,12 @@ void MainWindow::moverPiedra() {
                         // Piedra destruye tijeras
                         scene->removeItem(otroPixmapItem);
                         actualizarPuntaje(1, "piedra");
-                        delete otroPixmapItem;
+                        //delete otroPixmapItem;
                     } else if (otroPixmap.cacheKey() == QPixmap(":/Objetos/papel.png").cacheKey()) {
                         // Papel destruye piedra
                         scene->removeItem(piedraItem);
                         actualizarPuntaje(1, "papel");
-                        delete piedraItem;
+                        //delete piedraItem;
                         break;
                     }
                 }
@@ -387,12 +408,12 @@ void MainWindow::moverPapel() {
                         // Papel destruye piedra
                         scene->removeItem(otroPixmapItem);
                         actualizarPuntaje(1, "papel");
-                        delete otroPixmapItem;
+                        //delete otroPixmapItem;
                     } else if (otroPixmap.cacheKey() == QPixmap(":/Objetos/tijera.png").cacheKey()) {
                         // Tijeras destruyen papel
                         scene->removeItem(papelItem);
                         actualizarPuntaje(1, "tijeras");
-                        delete papelItem;
+                        //delete papelItem;
                         break;
                     }
                 }
