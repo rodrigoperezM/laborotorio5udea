@@ -58,6 +58,7 @@ private:
     QMediaPlayer *player;
 
 
+
     int contarObjetos(const QString &tipo);
     void mostrarInstrucciones();
 

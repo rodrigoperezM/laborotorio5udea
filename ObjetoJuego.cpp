@@ -36,7 +36,7 @@ void Tijeras::advance(int step)
     // Si las tijeras salen de la escena por la derecha, eliminarlas
     if (pos().x() > scene()->width()) {
         scene()->removeItem(this);
-        delete this;
+       // delete this;
     }
 }
 void Piedra::advance(int step)
@@ -51,7 +51,7 @@ void Piedra::advance(int step)
     // Si la piedra sale de la escena por abajo, eliminarla
     if (pos().y() > scene()->height()) {
         scene()->removeItem(this);
-        delete this;
+        //delete this;
     }
 }
 
@@ -67,6 +67,6 @@ void Papel::advance(int step)
     // Si el papel sale de la escena por abajo o por la derecha, eliminarlo
     if (pos().x() > scene()->width() || pos().y() > scene()->height()) {
         scene()->removeItem(this);
-        delete this;
+        //delete this;
     }
 }

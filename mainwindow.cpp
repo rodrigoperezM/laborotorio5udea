@@ -4,6 +4,8 @@
 #include <QRandomGenerator>
 #include <QMessageBox>
 #include <QMediaPlayer>
+#include <QRandomGenerator>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -22,10 +24,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
 
     // En el constructor de tu clase MainWindow, inicializa el objeto QMediaPlayer
-
+    player = new QMediaPlayer(this);
     ui->setupUi(this);
     ui->graphicsView->setScene(scene);
-    player = new QMediaPlayer(this);
+
 
     connect(ui->piedra, &QPushButton::clicked, this, &MainWindow::agregarPiedra);
     connect(ui->papel, &QPushButton::clicked, this, &MainWindow::agregarPapel);
@@ -48,41 +50,26 @@ MainWindow::MainWindow(QWidget *parent)
             "3-El objetivo es destruir tantos objetos como puedas.\n"
             "4-Puedes agregar piedras, papeles o tijeras usando los botones correspondientes.\n"
             "5-El juego termina cuando se acaba el tiempo.\n"
-            "¡Disfruta del juego y diviertete!");
+            "¡Disfruta del juego y diviertete!\n"
+            "ENTER PARA COMENZAR");
 }
+
 
 MainWindow::~MainWindow()
 {
-    delete timer;
-    delete scene;
     delete ui;
-
-
+    delete scene;
+    delete timer;
 }
-
-int MainWindow::contarObjetos(const QString &tipo) {
-    int count = 0;
-    foreach (QGraphicsItem *item, scene->items()) {
-        QGraphicsPixmapItem *pixmapItem = dynamic_cast<QGraphicsPixmapItem *>(item);
-        if (pixmapItem) {
-            QPixmap pixmap = pixmapItem->pixmap();
-            if ((tipo == "tijeras" && pixmap.cacheKey() == QPixmap(":/Objetos/tijera.png").cacheKey()) ||
-                (tipo == "piedra" && pixmap.cacheKey() == QPixmap(":/Objetos/piedra.png").cacheKey()) ||
-                (tipo == "papel" && pixmap.cacheKey() == QPixmap(":/Objetos/papel.png").cacheKey())) {
-                count++;
-            }
-        }
-    }
-    return count;
-}
-
 
 void MainWindow::agregarPiedra() {
     if (scene->items().count() < 5) {
         QPixmap piedraSprite(":/Objetos/piedra.png");
         QGraphicsPixmapItem *piedraItem = new QGraphicsPixmapItem(piedraSprite);
-        int posX = QRandomGenerator::global()->bounded(0, ui->graphicsView->width() - piedraSprite.width());
-        int posY = 0;
+        int posX = QRandomGenerator::global()->bounded(1, ui->graphicsView->width() - piedraSprite.width());
+        //int posY = 0;
+        int posY = QRandomGenerator::global()->bounded(0, ui->graphicsView->height() - piedraSprite.height());
+
         piedraItem->setPos(posX, posY);
         if (!verificarColision(piedraItem)) {
             scene->addItem(piedraItem);
@@ -94,7 +81,7 @@ void MainWindow::agregarPiedra() {
             connect(timerPiedra, &QTimer::timeout, this, &MainWindow::moverPiedra);
             timerPiedra->start(80);
         } else {
-            //delete piedraItem;
+            delete piedraItem;
         }
     }
 }
@@ -103,20 +90,23 @@ void MainWindow::agregarPapel() {
     if (scene->items().count() < 5) {
         QPixmap papelSprite(":/Objetos/papel.png");
         QGraphicsPixmapItem *papelItem = new QGraphicsPixmapItem(papelSprite);
-        int posX = 0;
-        int posY = 0;
+
+        // Generar coordenadas aleatorias dentro de los límites de la escena
+        int posX = QRandomGenerator::global()->bounded(scene->width() - papelSprite.width());
+        int posY = QRandomGenerator::global()->bounded(scene->height() - papelSprite.height());
+
         papelItem->setPos(posX, posY);
+
         if (!verificarColision(papelItem)) {
             scene->addItem(papelItem);
-            direcciones[papelItem] = QPointF(10,10); // Inicializar dirección
-            //actualizarPuntaje(1, "papel");
+            direcciones[papelItem] = QPointF(10, 10); // Inicializar dirección con una velocidad constante
 
             // Crear un temporizador para mover el papel
             QTimer *timerPapel = new QTimer(this);
             connect(timerPapel, &QTimer::timeout, this, &MainWindow::moverPapel);
             timerPapel->start(80);
         } else {
-            //delete papelItem;
+            delete papelItem;
         }
     }
 }
@@ -125,20 +115,22 @@ void MainWindow::agregarTijera() {
     if (scene->items().count() < 5) {
         QPixmap tijeraSprite(":/Objetos/tijera.png");
         QGraphicsPixmapItem *tijeraItem = new QGraphicsPixmapItem(tijeraSprite);
-        int posX = 0;
-        int posY = 0;
+        int posX = QRandomGenerator::global()->bounded(1, ui->graphicsView->width() - tijeraSprite.width());
+        //int posY = 0;
+        int posY = QRandomGenerator::global()->bounded(0, ui->graphicsView->height() - tijeraSprite.height());
+
         tijeraItem->setPos(posX, posY);
+
         if (!verificarColision(tijeraItem)) {
             scene->addItem(tijeraItem);
             direcciones[tijeraItem] = QPointF(10, 0); // Inicializar dirección
-            //actualizarPuntaje(1, "tijeras");
 
             // Crear un temporizador para mover la tijera
             QTimer *timerTijera = new QTimer(this);
             connect(timerTijera, &QTimer::timeout, this, &MainWindow::moverTijeras);
             timerTijera->start(80);
         } else {
-            //delete tijeraItem;
+            delete tijeraItem;
         }
     }
 }
@@ -196,7 +188,7 @@ void MainWindow::iniciarJuego() {
 
 }
 
-void MainWindow::ingresarJugador() {
+/*void MainWindow::ingresarJugador() {
     agregarMira();
     tiempoRestante = 300; // 5 minutos en segundos
     ui->tiempoLabel->display(tiempoRestante); // Mostrar el tiempo restante
@@ -217,11 +209,45 @@ void MainWindow::ingresarJugador() {
     ui->inicio->setDisabled(true);
 
 
+}*/
+
+void MainWindow::ingresarJugador() {
+    agregarMira();
+    tiempoRestante = 60; // 5 minutos en segundos
+
+    // Mostrar el tiempo inicial en formato MM:SS
+    int minutes = tiempoRestante / 60;
+    int seconds = tiempoRestante % 60;
+    ui->tiempoLabel->display(QString::asprintf("%02d:%02d", minutes, seconds));
+
+    timer->start(1000); // Iniciar el temporizador con intervalo de 1 segundo
+
+    autoCreateTimer->start(10000); // Iniciar el temporizador para crear objetos automáticamente cada 10 segundos
+
+    // Llamar a la función para crear objetos automáticamente cada 10 segundos
+    QTimer *crearObjetosTimer = new QTimer(this);
+    connect(crearObjetosTimer, &QTimer::timeout, this, &MainWindow::crearObjetosAutomaticamente);
+    crearObjetosTimer->start(10000); // Intervalo de 10 segundos
+
+    // Deshabilitar botones
+    ui->piedra->setDisabled(true);
+    ui->papel->setDisabled(true);
+    ui->tijera->setDisabled(true);
+    ui->ingresarJugador->setDisabled(true);
+    ui->inicio->setDisabled(true);
 }
 
+
 void MainWindow::actualizarTiempo() {
-    tiempoRestante--;
-    ui->tiempoLabel->display(tiempoRestante);
+    //tiempoRestante--;
+    //ui->tiempoLabel->display(tiempoRestante);
+    if (tiempoRestante > 0) {
+        tiempoRestante--;
+    }
+
+    int minutes = tiempoRestante / 60;
+    int seconds = tiempoRestante % 60;
+    ui->tiempoLabel->display(QString::asprintf("%02d:%02d", minutes, seconds));
 
     if (tiempoRestante <= 0) {
         timer->stop();
@@ -249,10 +275,9 @@ void MainWindow::actualizarTiempo() {
 
 void MainWindow::atacarObjeto() {
     if (mira) {
-        foreach (QGraphicsItem *item, scene->items()) {
+        QList<QGraphicsItem *> items = scene->items();
+        for (QGraphicsItem *item : items) {
             if (item != mira && item->collidesWithItem(mira)) {
-                scene->removeItem(item);
-
                 QGraphicsPixmapItem *pixmapItem = dynamic_cast<QGraphicsPixmapItem *>(item);
                 if (pixmapItem) {
                     QPixmap pixmap = pixmapItem->pixmap();
@@ -260,24 +285,32 @@ void MainWindow::atacarObjeto() {
                     if (pixmap.cacheKey() == QPixmap(":/Objetos/tijera.png").cacheKey()) {
                         actualizarPuntaje(1, "puntajeLabel");
                         ui->puntajeLabel->display(puntaje);
-                        //actualizarPuntaje(1, "tijeras");
                     } else if (pixmap.cacheKey() == QPixmap(":/Objetos/piedra.png").cacheKey()) {
                         actualizarPuntaje(1, "puntajeLabel");
                         ui->puntajeLabel->display(puntaje);
-
                     } else if (pixmap.cacheKey() == QPixmap(":/Objetos/papel.png").cacheKey()) {
                         actualizarPuntaje(1, "puntajeLabel");
                         ui->puntajeLabel->display(puntaje);
-
                     }
+
+                    // Crear una nueva instancia de QMediaPlayer para cada reproducción
+                    QMediaPlayer *player = new QMediaPlayer();
+                    player->setMedia(QUrl("qrc:/sonido.mp3"));
+
+                    // Conectar la señal de finalización para eliminar el QMediaPlayer
+                    connect(player, &QMediaPlayer::mediaStatusChanged, player, [player](QMediaPlayer::MediaStatus status) {
+                        if (status == QMediaPlayer::EndOfMedia) {
+                            player->deleteLater();
+                        }
+                    });
+
+                    player->play();
+
+                    // Eliminar el objeto de la escena después de haber realizado todas las operaciones
+                    scene->removeItem(item);
+                    delete item;
+                    return;
                 }
-
-                player->setMedia(QUrl("qrc:/sonido.mp3"));
-                   player->play();
-
-
-                //delete item;
-                return;
             }
         }
     }
@@ -326,12 +359,12 @@ void MainWindow::moverTijeras() {
                         // Tijeras destruyen papel
                         scene->removeItem(otroPixmapItem);
                         actualizarPuntaje(1, "tijeras");
-                        //delete otroPixmapItem;
+                        delete otroPixmapItem;
                     } else if (otroPixmap.cacheKey() == QPixmap(":/Objetos/piedra.png").cacheKey()) {
                         // Piedra destruye tijeras
                         scene->removeItem(tijeraItem);
                         actualizarPuntaje(1, "piedra");
-                        //delete tijeraItem;
+                        delete tijeraItem;
                         break;
                     }
                 }
@@ -367,12 +400,12 @@ void MainWindow::moverPiedra() {
                         // Piedra destruye tijeras
                         scene->removeItem(otroPixmapItem);
                         actualizarPuntaje(1, "piedra");
-                        //delete otroPixmapItem;
+                        delete otroPixmapItem;
                     } else if (otroPixmap.cacheKey() == QPixmap(":/Objetos/papel.png").cacheKey()) {
                         // Papel destruye piedra
                         scene->removeItem(piedraItem);
                         actualizarPuntaje(1, "papel");
-                        //delete piedraItem;
+                        delete piedraItem;
                         break;
                     }
                 }
@@ -408,12 +441,12 @@ void MainWindow::moverPapel() {
                         // Papel destruye piedra
                         scene->removeItem(otroPixmapItem);
                         actualizarPuntaje(1, "papel");
-                        //delete otroPixmapItem;
+                        delete otroPixmapItem;
                     } else if (otroPixmap.cacheKey() == QPixmap(":/Objetos/tijera.png").cacheKey()) {
                         // Tijeras destruyen papel
                         scene->removeItem(papelItem);
                         actualizarPuntaje(1, "tijeras");
-                        //delete papelItem;
+                        delete papelItem;
                         break;
                     }
                 }
@@ -430,7 +463,6 @@ void MainWindow::moverPapel() {
         }
     }
 }
-
 
 void MainWindow::crearObjetosAutomaticamente() {
     if (scene->items().size() < 5) {

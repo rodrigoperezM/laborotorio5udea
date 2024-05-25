@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>sonido.qrc</file>
         <file>sonido.mp3</file>
     </qresource>
 </RCC>
