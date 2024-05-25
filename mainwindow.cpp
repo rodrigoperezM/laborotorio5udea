@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     , scene(new QGraphicsScene(this))
     , timer(new QTimer(this))
     , autoCreateTimer(new QTimer(this)) // Inicializar autoCreateTimer
-    , tiempoRestante(300) // Tiempo inicial en segundos (5 minutos)
+    //, tiempoRestante(300) // Tiempo inicial en segundos (5 minutos)
     , puntaje(0) // Inicializar puntaje en 0
     , puntajeTijeras(0) // Inicializar puntaje tijeras en 0
     , puntajePiedra(0) // Inicializar puntaje piedra en 0
@@ -176,9 +176,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
 
 void MainWindow::iniciarJuego() {
 
-    //tiempoRestante = 300; // Tiempo inicial en segundos
-    //actualizarTiempo(); // Lógica para iniciar el juego
-    //timer->start(1000); // Iniciar el temporizador con un intervalo de 1 segundo
     // Llamar a la función para crear objetos automáticamente
         crearObjetosAutomaticamente();
 
@@ -188,32 +185,9 @@ void MainWindow::iniciarJuego() {
 
 }
 
-/*void MainWindow::ingresarJugador() {
-    agregarMira();
-    tiempoRestante = 300; // 5 minutos en segundos
-    ui->tiempoLabel->display(tiempoRestante); // Mostrar el tiempo restante
-    timer->start(1000); // Iniciar el temporizador con intervalo de 1 segundo
-
-    autoCreateTimer->start(10000); // Iniciar el temporizador para crear objetos automáticamente cada 10 segundos
-
-    // Llamar a la función para crear objetos automáticamente cada 10 segundos
-    QTimer *crearObjetosTimer = new QTimer(this);
-    connect(crearObjetosTimer, &QTimer::timeout, this, &MainWindow::crearObjetosAutomaticamente);
-    crearObjetosTimer->start(10000); // Intervalo de 10 segundos
-
-    // Deshabilitar botones
-    ui->piedra->setDisabled(true);
-    ui->papel->setDisabled(true);
-    ui->tijera->setDisabled(true);
-    ui->ingresarJugador->setDisabled(true);
-    ui->inicio->setDisabled(true);
-
-
-}*/
-
 void MainWindow::ingresarJugador() {
     agregarMira();
-    tiempoRestante = 60; // 5 minutos en segundos
+    tiempoRestante = 300; // 5 minutos en segundos
 
     // Mostrar el tiempo inicial en formato MM:SS
     int minutes = tiempoRestante / 60;
@@ -237,10 +211,7 @@ void MainWindow::ingresarJugador() {
     ui->inicio->setDisabled(true);
 }
 
-
 void MainWindow::actualizarTiempo() {
-    //tiempoRestante--;
-    //ui->tiempoLabel->display(tiempoRestante);
     if (tiempoRestante > 0) {
         tiempoRestante--;
     }
@@ -251,9 +222,8 @@ void MainWindow::actualizarTiempo() {
 
     if (tiempoRestante <= 0) {
         timer->stop();
-        autoCreateTimer->stop(); // Detener autoCreateTimer cuando se acabe el tiempo
+        autoCreateTimer->stop();
 
-        // Determinar el ganador basado en el puntaje
         QString ganador;
         int puntajeMaximo = qMax(puntajeTijeras, qMax(puntajePiedra, puntajePapel));
         if (puntajeMaximo == puntajeTijeras) {
@@ -264,10 +234,10 @@ void MainWindow::actualizarTiempo() {
             ganador = "Papeles";
         }
 
-        // Verificar si el jugador tiene el puntaje máximo
-               if (puntajeMaximo == puntajeLabel) {
-                   ganador = "el jugador";
-               }
+        if (puntajeMaximo == puntajeLabel) {
+            ganador = "el jugador";
+        }
+
         QMessageBox::information(this, "Fin de juego", "Se acabó el tiempo. ¡Juego terminado!\n"
                                  "El ganador es: " + ganador);
     }
