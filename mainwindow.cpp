@@ -6,7 +6,8 @@
 #include <QMediaPlayer>
 #include <QRandomGenerator>
 
-
+//Constructor Inicializa los componentes de la interfaz y
+//los temporizadores, y conecta las señales y slots.
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -36,7 +37,11 @@ MainWindow::MainWindow(QWidget *parent)
         scene->addItem(explosion);
         explosion->setZValue(1);
 
+        timer = new QTimer(this);
+        autoCreateTimer = new QTimer(this);
+        gameTimer = new QTimer(this);
 
+        //se establecen las conexiones entre botones, temporizadores y métodos:
     connect(ui->piedra, &QPushButton::clicked, this, &MainWindow::agregarPiedra);
     connect(ui->papel, &QPushButton::clicked, this, &MainWindow::agregarPapel);
     connect(ui->tijera, &QPushButton::clicked, this, &MainWindow::agregarTijera);
@@ -44,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->inicio, &QPushButton::clicked, this, &MainWindow::iniciarJuego);
     connect(timer, &QTimer::timeout, this, &MainWindow::actualizarTiempo);
     connect(autoCreateTimer, &QTimer::timeout, this, &MainWindow::crearObjetosAutomaticamente);
-
+    connect(gameTimer, &QTimer::timeout, this, &MainWindow::actualizarTiempo);
     // Inicializar las secciones de puntajes
     ui->puntajeTijeras->display(puntajeTijeras);
     ui->puntajePiedra->display(puntajePiedra);
@@ -217,7 +222,7 @@ void MainWindow::iniciarJuego() {
 
 void MainWindow::ingresarJugador() {
     agregarMira();
-    tiempoRestante = 300; // 5 minutos en segundos
+    tiempoRestante = 20; // 5 minutos en segundos
 
     // Mostrar el tiempo inicial en formato MM:SS
     int minutes = tiempoRestante / 60;
@@ -269,6 +274,9 @@ void MainWindow::actualizarTiempo() {
             ganador = "el jugador";
         }
 
+        timer->stop();
+            autoCreateTimer->stop();
+            gameTimer->stop();
         QMessageBox::information(this, "Fin de juego", "Se acabó el tiempo. ¡Juego terminado!\n"
                                  "El ganador es: " + ganador);
     }

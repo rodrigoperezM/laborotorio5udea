@@ -45,9 +45,12 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QGraphicsScene *scene;
-    QTimer *timer;
-    QTimer *autoCreateTimer;
+    QGraphicsScene *scene;//Maneja la escena gráfica donde se muestran los objetos del juego.
+    QTimer *timer;//Temporizador que controla la duración total del juego.
+
+        QTimer *gameTimer;
+
+    QTimer *autoCreateTimer;//Temporizador para la creación automática de objetos.
     int tiempoRestante;
     int puntaje;
     int puntajeTijeras;
@@ -57,8 +60,10 @@ private:
     QGraphicsPixmapItem *mira;
     QMap<QGraphicsPixmapItem*, QPointF> direcciones;
 
-    QMediaPlayer *player;
-    Explosion *explosion;
+    QMediaPlayer *player;//Objeto para reproducir sonidos.
+    Explosion *explosion;//Objeto que maneja la animación de explosión.
+
+
 
     int contarObjetos(const QString &tipo);
     void mostrarInstrucciones();
