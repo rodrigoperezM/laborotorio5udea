@@ -12,11 +12,13 @@ CONFIG += c++11
 
 SOURCES += \
     ObjetoJuego.cpp \
+    explosion.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     ObjetoJuego.h \
+    explosion.h \
     mainwindow.h
 
 FORMS += \
@@ -30,6 +32,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     Mira.qrc \
     Objetos.qrc \
+    explosion.qrc \
     sonido.qrc
 
 DISTFILES += \

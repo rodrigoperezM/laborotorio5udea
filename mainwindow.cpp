@@ -20,13 +20,21 @@ MainWindow::MainWindow(QWidget *parent)
     , puntajePapel(0) // Inicializar puntaje papel en 0
     , puntajeLabel(0)
     , mira(nullptr) // Inicializar la mira como nullptr
+    , explosion(new Explosion())
 
 {
 
-    // En el constructor de tu clase MainWindow, inicializa el objeto QMediaPlayer
+    //inicializa el objeto QMediaPlayer
     player = new QMediaPlayer(this);
     ui->setupUi(this);
     ui->graphicsView->setScene(scene);
+    // Configura el QMediaPlayer
+       player->setMedia(QUrl("qrc:/sonido.mp3"));
+       player->setVolume(50);
+
+    // Agrega la explosión a la escena
+        scene->addItem(explosion);
+        explosion->setZValue(1);
 
 
     connect(ui->piedra, &QPushButton::clicked, this, &MainWindow::agregarPiedra);
@@ -52,15 +60,39 @@ MainWindow::MainWindow(QWidget *parent)
             "5-El juego termina cuando se acaba el tiempo.\n"
             "¡Disfruta del juego y diviertete!\n"
             "ENTER PARA COMENZAR");
+
 }
 
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-    delete scene;
-    delete timer;
+   // Detener timers antes de eliminar objetos
+        timer->stop();
+        autoCreateTimer->stop();
+
+        // Liberar memoria de los objetos en orden seguro
+        delete explosion;
+        explosion = nullptr;
+
+        delete player;
+        player = nullptr;
+
+        delete mira;
+        mira = nullptr;
+
+        delete autoCreateTimer;
+        autoCreateTimer = nullptr;
+
+        delete timer;
+        timer = nullptr;
+
+        delete scene;
+        scene = nullptr;
+
+        delete ui;
+        ui = nullptr;
 }
+
 
 void MainWindow::agregarPiedra() {
     if (scene->items().count() < 5) {
@@ -181,8 +213,6 @@ void MainWindow::iniciarJuego() {
 
         // Iniciar autoCreateTimer para crear objetos automáticamente cada 10 segundos
         autoCreateTimer->start(1000);
-
-
 }
 
 void MainWindow::ingresarJugador() {
@@ -220,12 +250,13 @@ void MainWindow::actualizarTiempo() {
     int seconds = tiempoRestante % 60;
     ui->tiempoLabel->display(QString::asprintf("%02d:%02d", minutes, seconds));
 
+    int puntajeMaximo = std::max({puntaje, puntajeTijeras, puntajePiedra, puntajePapel});
     if (tiempoRestante <= 0) {
         timer->stop();
         autoCreateTimer->stop();
 
         QString ganador;
-        int puntajeMaximo = qMax(puntajeTijeras, qMax(puntajePiedra, puntajePapel));
+
         if (puntajeMaximo == puntajeTijeras) {
             ganador = "Tijeras";
         } else if (puntajeMaximo == puntajePiedra) {
@@ -234,7 +265,7 @@ void MainWindow::actualizarTiempo() {
             ganador = "Papeles";
         }
 
-        if (puntajeMaximo == puntajeLabel) {
+        else if(puntajeMaximo == puntaje) {
             ganador = "el jugador";
         }
 
@@ -274,17 +305,29 @@ void MainWindow::atacarObjeto() {
                         }
                     });
 
+                    // Reproducir sonido de explosión
+                    if (player->state() == QMediaPlayer::PlayingState) {
+                        player->stop();
+                    }
                     player->play();
+
+                    // Mostrar la explosión en la posición del objeto eliminado
+                    QPointF posicionObjeto = item->pos();
+                    explosion->startExplosion(posicionObjeto);
+
 
                     // Eliminar el objeto de la escena después de haber realizado todas las operaciones
                     scene->removeItem(item);
                     delete item;
+
                     return;
                 }
             }
         }
     }
 }
+
+
 
 void MainWindow::actualizarPuntaje(int puntos, const QString &tipo) {
     if (tipo == "tijeras") {
@@ -297,9 +340,9 @@ void MainWindow::actualizarPuntaje(int puntos, const QString &tipo) {
         puntajePapel += puntos;
         ui->puntajePapel->display(puntajePapel);
     }
-
+else{
     puntaje += puntos;
-    //ui->puntajeLabel->display(puntaje);
+    ui->puntajeLabel->display(puntaje);}
 }
 
 bool MainWindow::verificarColision(QGraphicsPixmapItem *item) {
@@ -310,6 +353,7 @@ bool MainWindow::verificarColision(QGraphicsPixmapItem *item) {
     }
     return false;
 }
+
 
 void MainWindow::moverTijeras() {
     QList<QGraphicsItem *> items = scene->items();
@@ -341,10 +385,12 @@ void MainWindow::moverTijeras() {
             }
 
             // Rebotar en los bordes de la pantalla
-            if (tijeraItem->x() <= 0 || tijeraItem->x() + tijeraItem->pixmap().width() >= ui->graphicsView->width()) {
+            if (tijeraItem->x() <= 0 || tijeraItem->x() + tijeraItem->pixmap().width() >= ui->graphicsView->width())
+            {
                 direccion.setX(-direccion.x());
             }
-            if (tijeraItem->y() <= 0 || tijeraItem->y() + tijeraItem->pixmap().height() >= ui->graphicsView->height()) {
+            if (tijeraItem->y() <= 0 || tijeraItem->y() + tijeraItem->pixmap().height() >= ui->graphicsView->height())
+            {
                 direccion.setY(-direccion.y());
             }
             direcciones[tijeraItem] = direccion;
@@ -353,9 +399,12 @@ void MainWindow::moverTijeras() {
 }
 
 void MainWindow::moverPiedra() {
+
     QList<QGraphicsItem *> items = scene->items();
+
     for (QGraphicsItem *item : items) {
         QGraphicsPixmapItem *piedraItem = dynamic_cast<QGraphicsPixmapItem *>(item);
+
         if (piedraItem && piedraItem->pixmap().cacheKey() == QPixmap(":/Objetos/piedra.png").cacheKey()) {
             QPointF direccion = direcciones[piedraItem];
             piedraItem->moveBy(direccion.x(), direccion.y());

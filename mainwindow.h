@@ -10,6 +10,7 @@
 #include <QMap>
 #include <QPointF>
 #include <QMediaPlayer>
+#include "explosion.h"
 
 namespace Ui {
 class MainWindow;
@@ -22,6 +23,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
 
 private slots:
     void agregarPiedra();
@@ -54,10 +56,9 @@ private:
     int puntajeLabel;
     QGraphicsPixmapItem *mira;
     QMap<QGraphicsPixmapItem*, QPointF> direcciones;
-    // Declara un objeto QMediaPlayer como miembro de tu clase MainWindow
+
     QMediaPlayer *player;
-
-
+    Explosion *explosion;
 
     int contarObjetos(const QString &tipo);
     void mostrarInstrucciones();
